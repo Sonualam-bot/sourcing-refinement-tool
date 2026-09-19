@@ -10,4 +10,12 @@ export default defineConfig({
       '/api': 'http://localhost:4000',
     },
   },
+  // `npm start` (vite preview) is a separate server from `npm run dev`, so it
+  // needs its own proxy config - without this, a locally built+started client
+  // can't reach a locally built+started server (see server/README start docs).
+  preview: {
+    proxy: {
+      '/api': 'http://localhost:4000',
+    },
+  },
 })

@@ -12,6 +12,5 @@ ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/src/data/profiles.json ./dist/data/profiles.json
 EXPOSE 4000
 CMD ["node", "dist/index.js"]

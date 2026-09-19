@@ -23,11 +23,20 @@ container is internal.
 
 **Env var:** `GEMINI_API_KEY` (required). `GEMINI_MODEL` (optional, defaults to `gemini-3.6-flash`).
 
-### Running without Docker (for development)
+### Running without Docker
+
+For development (hot reload):
 
 ```
 cd server && npm install && npm run dev   # :4000, reads server/.env
 cd client && npm install && npm run dev   # :5173, proxies /api to :4000
+```
+
+Or as a built, production-style run (mirrors what the Docker image does, minus the container):
+
+```
+cd server && npm install && npm run build && npm start   # :4000
+cd client && npm install && npm run build && npm start   # :5173, proxies /api to :4000
 ```
 
 ## Prompts
