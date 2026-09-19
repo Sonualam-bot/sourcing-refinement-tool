@@ -72,13 +72,22 @@ export function ResultsScreen({
         <p className="text-sm text-brand-moss">
           Searching for: <span className="font-medium text-brand-ink">"{query}"</span>
         </p>
-        <button
-          type="button"
-          onClick={onFreeze}
-          className="rounded-lg border border-brand-forest px-3 py-1.5 text-xs font-semibold text-brand-forest hover:bg-brand-sage"
-        >
-          Freeze search
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onRerunWithEditedFilters}
+            className="rounded-lg border border-brand-mist px-3 py-1.5 text-xs font-semibold text-brand-ink hover:border-brand-clay"
+          >
+            Re-run search
+          </button>
+          <button
+            type="button"
+            onClick={onFreeze}
+            className="rounded-lg border border-brand-forest px-3 py-1.5 text-xs font-semibold text-brand-forest hover:bg-brand-sage"
+          >
+            Freeze search
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -86,19 +95,11 @@ export function ResultsScreen({
         <RubricEditor rubric={rubric} onChange={onEditRubric} />
       </div>
 
-      <button
-        type="button"
-        onClick={onRerunWithEditedFilters}
-        className="text-xs font-medium text-brand-forest hover:opacity-80"
-      >
-        Re-run search with these edits
-      </button>
-
       {whatChanged && <DiffNote whatChanged={whatChanged} />}
 
       {isRefining && <LoadingIndicator label="Applying your feedback and re-scoring candidates..." />}
 
-      {!isRefining && matchCount === 0 && <EmptyResults />}
+      {!isRefining && matchCount === 0 && <EmptyResults onRerunWithEditedFilters={onRerunWithEditedFilters} />}
 
       {!isRefining && matchCount > 0 && (
         <>
