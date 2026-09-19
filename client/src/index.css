@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+/*
+ * Flexiple's own brand palette, pulled into design tokens rather than
+ * hardcoded per component - one place to keep the app's visual identity
+ * consistent with flexiple.com instead of a generic UI-kit blue.
+ */
+@theme {
+  --color-brand-cream: #f8f8f8;
+  --color-brand-ink: #181818;
+  --color-brand-forest: #042c1d;
+  --color-brand-sage: #cce5c5;
+  --color-brand-mist: #e5e1e5;
+  --color-brand-moss: #5c7564;
+  --color-brand-clay: #7e635a;
+  --color-brand-navy: #081d26;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-brand-cream);
+  color: var(--color-brand-ink);
+}
