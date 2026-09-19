@@ -60,11 +60,17 @@ LLM response goes through (`utils/callLLMForJSON.ts`).
 never holds a session - every request carries the full context it needs and returns the next
 state. Simpler than session/cookie machinery, and fully correct for a single-session flow.
 
-**Model-fallback chain, not just retry.** A free-tier key's rate limit is per model, and a
-refinement loop fires an LLM call on almost every recruiter action, so `GeminiClient` tries a
-short list of models (newest first) before failing, rather than retrying the same exhausted
-quota. Malformed/invalid JSON is handled separately, one repair pass with the validation error
-shown back to the model, in `callLLMForJSON.ts`.
+**Model-fallback chain, ordered by quota headroom, not capability.** The Gemini free tier tracks
+its daily request quota per model, and a refinement loop that fires an LLM call on nearly every
+recruiter action burns through a small daily allotment fast. `GeminiClient` first tried newest-
+model-first, then oldest-first, and both broke down under live testing: the newest model hit its
+20-requests/day cap, and the "most stable" older model turned out to be unavailable to this key's
+project entirely (404). The chain now leads with "lite" model variants specifically because
+they sit in a separate quota bucket from the full-size models - confirmed live against this key,
+not assumed from the model name - so exhausting one model's daily quota degrades to a genuinely
+different allotment instead of the same roll of the dice. Malformed/invalid JSON is a separate
+concern, handled with one repair pass that shows the validation error back to the model, in
+`callLLMForJSON.ts`.
 
 **Docker is a packaging step, not the dev loop.** Iterating inside containers is slow, so the app
 was built and tested natively the whole way through; Dockerfiles and `docker-compose.yml` were

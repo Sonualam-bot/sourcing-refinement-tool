@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Filters } from "../../types";
 
 const COMPANY_TYPES = ["startup", "scaleup", "enterprise", "agency"] as const;
@@ -25,11 +25,10 @@ export function FilterEditor({
       <h3 className="text-sm font-semibold text-brand-ink">Objective filters</h3>
 
       <Field label="Skills (comma separated)">
-        <input
+        <ListInput
           disabled={disabled}
-          value={filters.skills.join(", ")}
-          onChange={(e) => onChange({ ...filters, skills: splitList(e.target.value) })}
-          className={inputClass}
+          values={filters.skills}
+          onChange={(skills) => onChange({ ...filters, skills })}
         />
       </Field>
 
@@ -55,11 +54,10 @@ export function FilterEditor({
       </div>
 
       <Field label="Locations (comma separated)">
-        <input
+        <ListInput
           disabled={disabled}
-          value={filters.locations.join(", ")}
-          onChange={(e) => onChange({ ...filters, locations: splitList(e.target.value) })}
-          className={inputClass}
+          values={filters.locations}
+          onChange={(locations) => onChange({ ...filters, locations })}
         />
       </Field>
 
@@ -93,6 +91,51 @@ export function FilterEditor({
         </div>
       </Field>
     </div>
+  );
+}
+
+/**
+ * A comma-separated text field backed by a string[] value. Why this exists
+ * instead of a plain `<input value={values.join(", ")} .../>`: a controlled
+ * input whose displayed value is re-derived from the parsed array snaps
+ * back to the trimmed/filtered form on every keystroke - type a comma or a
+ * trailing space and it visually vanishes immediately, because splitList
+ * drops empty segments before the array gets rejoined for display. This
+ * keeps its own local, always-faithful-to-typing text state, and only
+ * resets that text from the incoming `values` prop when the prop changed
+ * for a reason other than our own last edit (i.e. an external update, like
+ * a refine round rewriting the filters) - not on every self-triggered
+ * re-render.
+ */
+function ListInput({
+  values,
+  onChange,
+  disabled,
+}: {
+  values: string[];
+  onChange: (values: string[]) => void;
+  disabled?: boolean;
+}) {
+  const [text, setText] = useState(values.join(", "));
+
+  useEffect(() => {
+    if (JSON.stringify(splitList(text)) !== JSON.stringify(values)) {
+      setText(values.join(", "));
+    }
+    // Only re-sync when `values` changes externally - intentionally excludes `text`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values]);
+
+  return (
+    <input
+      disabled={disabled}
+      value={text}
+      onChange={(e) => {
+        setText(e.target.value);
+        onChange(splitList(e.target.value));
+      }}
+      className={inputClass}
+    />
   );
 }
 
