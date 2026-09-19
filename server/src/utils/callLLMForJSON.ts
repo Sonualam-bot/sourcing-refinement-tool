@@ -28,26 +28,26 @@ export async function callLLMForJSON<T>(params: {
 }): Promise<T> {
   const { client, prompt, geminiSchema, zodSchema } = params;
 
-  const attempt = (p: string) =>
+  const requestRawJSON = (p: string) =>
     withTimeout(client.generateJSON({ prompt: p, schema: geminiSchema }), OVERALL_TIMEOUT_MS);
 
-  const raw = await attempt(prompt);
-  const first = tryValidate(raw, zodSchema);
-  if (first.ok) return first.data;
+  const raw = await requestRawJSON(prompt);
+  const firstResult = parseAndValidateJSON(raw, zodSchema);
+  if (firstResult.ok) return firstResult.data;
 
   // One repair pass: show the model exactly what it produced and why it was rejected.
-  const repairPrompt = `${prompt}\n\nYour previous response was invalid JSON or did not match the required schema.\nPrevious response:\n${raw}\nValidation error:\n${first.error}\n\nReturn ONLY corrected JSON matching the schema. No prose, no markdown fences.`;
-  const repaired = await attempt(repairPrompt);
-  const second = tryValidate(repaired, zodSchema);
-  if (second.ok) return second.data;
+  const repairPrompt = `${prompt}\n\nYour previous response was invalid JSON or did not match the required schema.\nPrevious response:\n${raw}\nValidation error:\n${firstResult.error}\n\nReturn ONLY corrected JSON matching the schema. No prose, no markdown fences.`;
+  const repaired = await requestRawJSON(repairPrompt);
+  const secondResult = parseAndValidateJSON(repaired, zodSchema);
+  if (secondResult.ok) return secondResult.data;
 
   throw new AppError(
     "INVALID_LLM_OUTPUT",
-    `LLM output failed validation twice. Last error: ${second.error}`
+    `LLM output failed validation twice. Last error: ${secondResult.error}`
   );
 }
 
-function tryValidate<T>(
+function parseAndValidateJSON<T>(
   raw: string,
   schema: z.ZodType<T, z.ZodTypeDef, any>
 ): { ok: true; data: T } | { ok: false; error: string } {

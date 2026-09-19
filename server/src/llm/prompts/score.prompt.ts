@@ -49,6 +49,9 @@ Rules for the explanation:
 - Must name real values from their record (e.g. an actual skill, their current_company, years_experience,
   current_company_type, or a past company) - never generic praise like "strong candidate" or "great fit"
   with no supporting detail.
+- Never mention the candidate's id (e.g. "p06") in the explanation text - the reader already sees who
+  it's about next to the explanation. Write it as a plain sentence about the person, not a data dump
+  (e.g. "6 years at a startup with deep AWS RDS experience" not "p06 has 6 years...").
 - If the candidate is a weak fit, say why using the same kind of specific detail (e.g. "3 years
   experience is below the target range" or "no AWS RDS in their skill list").
 
