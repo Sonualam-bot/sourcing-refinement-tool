@@ -5,18 +5,25 @@ import { withTimeout } from "../utils/withTimeout.js";
 
 const PER_MODEL_TIMEOUT_MS = 10_000;
 
-// Ordered newest/most-capable first. A free-tier key's rate limit is per
-// model, not per app, so a burst of requests hitting one model's quota
-// (a very real risk in a refinement loop that fires an LLM call on every
-// recruiter action) can fail over to the next model instead of blocking the
-// whole session. Confirmed available on this key via the ListModels API
-// before hardcoding - see the primary env override below for the one true
-// source of truth in production.
+// Ordered by free-tier reliability, not by capability - and specifically by
+// *separate quota pool*, not just "older is safer" (that heuristic broke:
+// gemini-2.5-flash turned out to be unavailable to new-user projects on this
+// key, a 404, not a capacity issue). The free tier's daily request quota is
+// tracked per model (`GenerateRequestsPerDayPerProjectPerModel-FreeTier`),
+// so a refinement loop that fires several calls per interaction can burn
+// through one model's daily allotment fast - once that happens, retrying a
+// same-tier flash model gains nothing, but a "lite" model is a genuinely
+// different quota bucket with real headroom, not just another roll of the
+// dice on the same one. Lite is plenty for structured extraction/scoring,
+// so it leads; the full flash models remain as later fallbacks. Every entry
+// here was confirmed live against this key (ListModels availability, then
+// an actual generateContent call) rather than assumed from a model name.
 const MODEL_FALLBACKS = dedupe([
   process.env.GEMINI_MODEL,
+  "gemini-flash-lite-latest",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
   "gemini-3.6-flash",
-  "gemini-3.5-flash",
-  "gemini-2.5-flash",
   "gemini-flash-latest",
 ]);
 

@@ -160,7 +160,18 @@ export function searchReducer(state: SearchState, action: SearchAction): SearchS
 
     case "DISMISS_ERROR":
       if (state.status !== "error") return state;
-      return state.previous ?? { status: "idle" };
+      // `previous` is whatever state was in flight when the request failed -
+      // for "interpret"/"run" that's itself a loading status with nothing
+      // left to drive it forward, so returning to it verbatim would leave
+      // the recruiter staring at a spinner forever. Only "refining" has a
+      // safe, non-loading state to fall back to (the results from before the
+      // failed refine attempt, exactly as if the attempt never happened);
+      // everything else resets to idle rather than getting stuck.
+      if (state.previous?.status === "refining") {
+        const { status: _status, ...rest } = state.previous;
+        return { status: "results", ...rest, whatChanged: null };
+      }
+      return { status: "idle" };
 
     default:
       return state;
