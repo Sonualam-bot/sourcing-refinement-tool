@@ -41,9 +41,11 @@ cd client && npm install && npm run build && npm start   # :5173, proxies /api t
 
 ## Prompts
 
-All three LLM interactions live as commented, readable template functions in
-`server/src/llm/prompts/` (`interpret.prompt.ts`, `score.prompt.ts`, `refine.prompt.ts`). Each
-file's header comment explains the reasoning behind how it's shaped, not just what it does.
+See [`PROMPTS.md`](./PROMPTS.md) for all three LLM prompts (interpret, score, refine) with their
+exact template text and the reasoning behind each. The source of truth is the commented template
+functions in `server/src/llm/prompts/` (`interpret.prompt.ts`, `score.prompt.ts`,
+`refine.prompt.ts`); `PROMPTS.md` is a readable index into those, not a separate copy that can
+drift silently.
 
 ## Decisions
 
